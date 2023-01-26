@@ -1,2 +1,2 @@
-# osh
+# oysh
 A really awesome shell
