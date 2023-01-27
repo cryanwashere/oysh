@@ -14,9 +14,11 @@ void init_shell() {
 }
 
 
+
+
 int takeInput(char* str) {
     char* buf;
-    buf = readline("\n@");
+    buf = readline("@");
     if (strlen(buf) != 0) {
         strcpy(str,buf);
         return 0;
@@ -54,6 +56,12 @@ void parseSpace(char* str, char** parsed)
     }
 }
 
+/*
+int cmdHandler(char** parsed) {
+
+}
+*/
+/*
 int processString(char* str, char** parsed, char** parsedpipe)
 {
     char* strpiped[2];
@@ -62,11 +70,27 @@ int processString(char* str, char** parsed, char** parsedpipe)
     piped = parsePipe(str, strpiped);
 
     if (piped) {
-        printf("found a piped input");
+        printf("oysh does not yet support piped inputs");
     } else {
         parseSpace(str, parsed);
     }
     return 0;
+}
+*/
+void execArgs(char** parsed) {
+    pid_t pid = fork();
+    if (pid == -1) {
+        printf("\nfailed forking child...");
+        return;
+    } else if (pid == 0) {
+        if (execvp(parsed[0], parsed) < 0) {
+            printf("\nfailed to execute command");
+        }
+        exit(0);
+    } else {
+        wait(NULL);
+        return;
+    }
 }
 
 int main() {
@@ -76,7 +100,20 @@ int main() {
     int execFlag = 0;
     init_shell();
 
-    takeInput(inputString) ;
-    execFlag = processString(inputString, parsedArgs, parsedArgsPiped);
+    while (1) {
+        takeInput(inputString);
+        if (strcmp(inputString,"what is the best shell?") == 0) {
+            printf("OYster SHell");
+        } 
+        if (strcmp(inputString,"exit") == 0) {
+            printf("goodbye");
+            exit(0);
+        }
+        //execFlag = processString(inputString, parsedArgs, parsedArgsPiped);
+        parseSpace(inputString, parsedArgs);
+
+        execArgs(parsedArgs);
+    }
     
+    return 0;
 }
