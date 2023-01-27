@@ -4,11 +4,14 @@
 #include <unistd.h>
 #include <readline/readline.h>
 
+
+#include "show.h"
+
 #define MAXLIST 100
 #define MAXCOM 1000
 
 void init_shell() {
-	printf("Welcome to OYster SHell!");
+	printf("Welcome to OYster SHell!\n");
 	//char* username = getenv("USER");
 	//printf("\nuser: %s", username);
 }
@@ -18,6 +21,10 @@ void init_shell() {
 
 int takeInput(char* str) {
     char* buf;
+
+    char* prompt;
+    //char* username = getenv("USER");
+    //strcat(prompt, username);
     buf = readline("@");
     if (strlen(buf) != 0) {
         strcpy(str,buf);
@@ -80,7 +87,7 @@ int processString(char* str, char** parsed, char** parsedpipe)
 void execArgs(char** parsed) {
     pid_t pid = fork();
     if (pid == -1) {
-        printf("\nfailed forking child...");
+        printf("failed forking child\n");
         return;
     } else if (pid == 0) {
         if (execvp(parsed[0], parsed) < 0) {
@@ -102,17 +109,35 @@ int main() {
 
     while (1) {
         takeInput(inputString);
+
+        if (strlen(inputString) == 0) {
+            continue;
+        }
+
+        int usedBuiltInCommand = 0;
         if (strcmp(inputString,"what is the best shell?") == 0) {
             printf("OYster SHell");
+            usedBuiltInCommand = 1;
         } 
         if (strcmp(inputString,"exit") == 0) {
             printf("goodbye");
+            usedBuiltInCommand = 1;
             exit(0);
         }
-        //execFlag = processString(inputString, parsedArgs, parsedArgsPiped);
         parseSpace(inputString, parsedArgs);
+        if (strcmp(parsedArgs[0], "show") == 0) {
+            show(parsedArgs[1]);
+            usedBuiltInCommand = 1;
+        }
+        
+        //execFlag = processString(inputString, parsedArgs, parsedArgsPiped);
+        if (usedBuiltInCommand == 0) {
+            
+            execArgs(parsedArgs);
+        }
+        
 
-        execArgs(parsedArgs);
+        
     }
     
     return 0;
